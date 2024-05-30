@@ -1,0 +1,4 @@
+eth_tester==0.12.0b1
+web3
+PySide6
+py-evm
