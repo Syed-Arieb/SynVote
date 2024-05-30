@@ -16,6 +16,10 @@ SynVote is an innovative open-source project hosted on GitHub, aimed at revoluti
    
 6. **Community-Driven Development:** As an open-source project, SynVote welcomes contributions from developers worldwide, fostering a collaborative environment for innovation and continuous improvement. Community feedback and contributions play a vital role in shaping the future development of SynVote, making it a truly democratic voting solution.
 
+## Screenshots
+![image](https://github.com/Syed-Arieb/SynVote/assets/171282248/4297c869-501e-4b95-9740-af787978ee56)
+
+
 ## Get Involved
 Join the SynVote community on [GitHub](https://github.com/) to contribute to the development, report issues, or suggest new features. Together, we can build a more transparent, secure, and inclusive voting system for the digital age.
 
