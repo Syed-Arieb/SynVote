@@ -1,4 +1,5 @@
-// pyside6-rcc qml.qrc -o ../qml/qml_rc.py
+// pyside6-rcc qml.qrc -o ../qml/qml_rc.p
+// Themes switching is currently disabled
 
 import AppStyle 1.0
 import QtQuick 2.15
@@ -78,7 +79,7 @@ Window {
             indicatorOnSource: "qrc:/Images/moon2.svg" // On  Image
             visible: false
         }
-        
+
         Text {
             id: title
 
@@ -155,6 +156,7 @@ Window {
             }
 
             Rectangle {
+                id: info_card
                 x: 0
                 y: 5
                 width: parent.width
@@ -219,6 +221,22 @@ Window {
                     horizontalAlignment: Text.AlignJustify
                 }
 
+            }
+
+            CustomTestBtn {
+                id: test
+
+                text: "Voting Rooms"
+                y: info_card.height + info_card.y + 15
+                x: 10
+                width: 145
+                height: 50
+                backgroundColor: "#26FE5F"
+                backgroundColorClicked: "#48FFC8"
+                backgroundColorHover: "#A4EE68"
+                foregroundColor: "#1e1e1e"
+                foregroundColorClicked: "#1e1e1e"
+                foregroundColorHover: "#1e1e1e"
             }
 
             Behavior on opacity {
