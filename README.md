@@ -26,5 +26,5 @@ Join the SynVote community on [GitHub](https://github.com/) to contribute to the
 ## License
 SynVote is released under GPL-3.0 license.
 
-### Disclaimer
-SynVote is a work in progress and may undergo changes and updates. Users are encouraged to review the project's documentation and contribute responsibly to its development.
+## Disclaimer
+SynVote is a work in progress and may undergo changes and updates. Users are encouraged to contribute responsibly to its development.
