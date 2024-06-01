@@ -17,6 +17,7 @@
         <file>Images/archive-add.svg</file>
         <file>Images/arrow-down.svg</file>
         <file>Images/arrow-up.svg</file>
+        <file>Images/arrow-right.svg</file>
         <file>Images/arrow.svg</file>
         <file>Images/eye-off.svg</file>
         <file>Images/eye-on.svg</file>
@@ -35,11 +36,13 @@
         <file>CustomDropDown.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file>CustomSwitch.qml</file>
-        <file>CustomTestBtn.qml</file>
+        <file>QPButton.qml</file>
         <file>ImageSwitch.qml</file>
         <file>Images/sun2.svg</file>
         <file>Images/moon2.svg</file>
         <file>Images/sun3.svg</file>
         <file>Images/x.svg</file>
+        <file>Images/shield.svg</file>
+        <file>Images/voting.svg</file>
     </qresource>
 </RCC>
