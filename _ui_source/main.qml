@@ -15,9 +15,10 @@ Window {
     property bool fade_in_pages: fade_in_pages_switch.checked
     property bool resizable_window: resizable_window_switch.checked
     property int curr_active_page: 0
-    property color dark_accent: "#56f580"
+    property color dark_accent: "#146EF5"
     property QtObject backend
     property string status: "SynVote -> Deploying Contract..."
+    property bool logged_in: false
 
     function toggleNavigation() {
         bottom_nav.y = bottom_nav.y === 0 ? bottom_nav_container.height - (toogle_bottom_nav.height / 3) : 0;
@@ -45,7 +46,7 @@ Window {
     maximumHeight: resizable_window ? Screen.height : 720
     visible: true
     title: qsTr(status)
-    color: light_dark_theme.checked ? "#34353b" : "#D0D0D9"
+    color: light_dark_theme.checked ? "#171717" : "#D0D0D9"
     Material.theme: Material.Dark
     Material.accent: Material.Green
 
@@ -56,7 +57,7 @@ Window {
         property int old_Y: 0
 
         z: 0
-        color: light_dark_theme.checked ? "#18191C" : "#F985BA"
+        color: light_dark_theme.checked ? "#242424" : "#F985BA"
         width: root.width
         height: 62
 
@@ -80,10 +81,20 @@ Window {
             visible: false
         }
 
+        IconImage {
+            source: "qrc:/Images/shield.svg"
+            width: 30
+            height: width
+            sourceSize: Qt.size(width, width)
+            x: 10
+            y: title.y
+            color: dark_accent
+        }
+
         Text {
             id: title
 
-            x: 20
+            x: 45
             y: parent.height / 2 - height / 2
             text: "SynVote"
             color: "#efefef"
@@ -96,7 +107,7 @@ Window {
         Rectangle {
             id: version_badge
 
-            x: title.x + title.width + 15
+            x: title.x + title.width + 10
             y: parent.height / 2 - height / 2
             width: 60
             height: title.height
@@ -109,7 +120,7 @@ Window {
                 x: parent.width / 2 - width / 2
                 y: parent.height / 2 - height / 2
                 text: "v1.0"
-                color: "#1e1e1e"
+                color: "#e3e3e3"
                 font.pointSize: 14
                 font.family: FontStyle.getContentFont.name
                 font.bold: Font.Bold
@@ -122,6 +133,17 @@ Window {
 
             }
 
+        }
+
+        QPButton {
+            id: get_started
+            text: "Get Started"
+            x: parent.width - width - 10
+            iconSource: "qrc:/Images/arrow-right.svg"
+            anchors.verticalCenter: parent.verticalCenter
+            backgroundColor: dark_accent
+            backgroundColorHover: "#1e1e1e"
+            backgroundColorClicked: "#1e1e1e"
         }
 
         Behavior on color {
@@ -155,95 +177,11 @@ Window {
                     opacity = 0;
             }
 
-            Rectangle {
-                id: info_card
-                x: 0
-                y: 5
-                width: parent.width
-                height: how_text.y + how_text.height + 20
-                color: titlebar.color
-                radius: 20
-
-                Text {
-                    id: welcome_title
-
-                    x: 20
-                    y: 15
-                    font.pointSize: 21
-                    font.family: FontStyle.contentFontBold.name
-                    font.bold: Font.Bold
-                    font.weight: Font.Bold
-                    text: "Welcome to SynVote!"
-                    color: light_dark_theme.checked ? dark_accent : "#250069"
-                }
-
-                Text {
-                    id: description_text
-
-                    x: 20
-                    y: welcome_title.y + welcome_title.height + 15
-                    width: parent.width - 40
-                    font.pointSize: 17
-                    font.family: FontStyle.getContentFont.name
-                    wrapMode: Text.WordWrap
-                    text: "SynVote is a secure and transparent voting app that leverages blockchain technology to ensure integrity, trust, and transparency in the voting process. With SynVote, you can create and participate in voting sessions with the confidence that every vote is accurately recorded and immutable.\n\n"
-                    color: light_dark_theme.checked ? "white" : "#1e1e1e"
-                    horizontalAlignment: Text.AlignJustify
-                }
-
-                Text {
-                    id: how_text_title
-
-                    x: 20
-                    y: description_text.y + description_text.height + 5
-                    width: parent.width - 40
-                    font.pointSize: 17
-                    font.family: FontStyle.contentFontBold.name
-                    font.bold: Font.Bold
-                    font.weight: Font.Bold
-                    wrapMode: Text.WordWrap
-                    text: "How It Works:\n"
-                    color: light_dark_theme.checked ? dark_accent : "#250069"
-                    horizontalAlignment: Text.AlignJustify
-                }
-
-                Text {
-                    id: how_text
-
-                    x: 20
-                    y: how_text_title.y + how_text_title.height + 5
-                    width: parent.width - 40
-                    font.pointSize: 17
-                    font.family: FontStyle.getContentFont.name
-                    wrapMode: Text.WordWrap
-                    text: "1. Deployer creates a Voting Room and adds Candidates.\n2. Participants cast their votes securely.\n3. View results in real-time."
-                    color: light_dark_theme.checked ? "white" : "#1e1e1e"
-                    horizontalAlignment: Text.AlignJustify
-                }
-
-            }
-
-            CustomTestBtn {
-                id: test
-
-                text: "Voting Rooms"
-                y: info_card.height + info_card.y + 15
-                x: 10
-                width: 145
-                height: 50
-                backgroundColor: "#26FE5F"
-                backgroundColorClicked: "#48FFC8"
-                backgroundColorHover: "#A4EE68"
-                foregroundColor: "#1e1e1e"
-                foregroundColorClicked: "#1e1e1e"
-                foregroundColorHover: "#1e1e1e"
-            }
-
             Behavior on opacity {
                 enabled: fade_in_pages
 
                 PropertyAnimation {
-                    duration: 800
+                    duration: 500
                     easing.type: Easing.InOutQuad
                 }
 
@@ -280,7 +218,7 @@ Window {
                 enabled: fade_in_pages
 
                 PropertyAnimation {
-                    duration: 1000
+                    duration: 500
                     easing.type: Easing.InOutQuad
                 }
 
@@ -355,7 +293,7 @@ Window {
                 height: 36
                 y: (parent.height / 2) - (height / 2)
                 x: 12
-                color: curr_active_page === 0 ? "#21ffffff" : "transparent"
+                color: "transparent"
                 radius: Math.min(parent.width, parent.height) / 2
 
                 MouseArea {
@@ -365,16 +303,21 @@ Window {
                     onClicked: on_navBtn_clicked(0)
                 }
 
-                Image {
+                IconImage {
                     source: "qrc:/Images/home.svg"
-                    sourceSize: Qt.size(parent.width, parent.width)
-                    width: 2 * parent.width / 3
-                    height: 2 * parent.width / 3
+                    width: 3 * parent.width / 4
+                    height: 3 * parent.width / 4
+                    sourceSize: Qt.size(width, width)
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
                     fillMode: Image.PreserveAspectFit
                     smooth: true
                     antialiasing: false
+                    color: curr_active_page === 0 ? dark_accent : "white"
+
+                    Behavior on color {
+                        ColorAnimation {}
+                    }
                 }
 
             }
@@ -386,7 +329,7 @@ Window {
                 height: 36
                 y: (parent.height / 2) - (height / 2)
                 x: 45 + home_btn.width
-                color: curr_active_page === 1 ? "#21ffffff" : "transparent"
+                color: "transparent"
                 radius: Math.min(parent.width, parent.height) / 2
 
                 MouseArea {
@@ -396,16 +339,21 @@ Window {
                     onClicked: on_navBtn_clicked(1)
                 }
 
-                Image {
+                IconImage {
                     source: "qrc:/Images/vote.svg"
-                    sourceSize: Qt.size(parent.width, parent.width)
-                    width: 2 * parent.width / 3
-                    height: 2 * parent.width / 3
+                    width: 3 * parent.width / 4
+                    height: 3 * parent.width / 4
+                    sourceSize: Qt.size(width, width)
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
                     fillMode: Image.PreserveAspectFit
                     smooth: true
                     antialiasing: false
+                    color: curr_active_page === 1 ? dark_accent : "white"
+
+                    Behavior on color {
+                        ColorAnimation {}
+                    }
                 }
 
             }
@@ -417,7 +365,7 @@ Window {
                 height: 36
                 y: (parent.height / 2) - (height / 2)
                 x: 33 + votes_btn.width + votes_btn.x
-                color: curr_active_page === 2 ? "#21ffffff" : "transparent"
+                color: "transparent"
                 radius: Math.min(parent.width, parent.height) / 2
 
                 MouseArea {
@@ -427,16 +375,21 @@ Window {
                     onClicked: on_navBtn_clicked(2)
                 }
 
-                Image {
+                IconImage {
                     source: "qrc:/Images/user.svg"
-                    sourceSize: Qt.size(parent.width, parent.width)
-                    width: 2 * parent.width / 3
-                    height: 2 * parent.width / 3
+                    width: 3 * parent.width / 4
+                    height: 3 * parent.width / 4
+                    sourceSize: Qt.size(width, width)
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
                     fillMode: Image.PreserveAspectFit
                     smooth: true
                     antialiasing: false
+                    color: curr_active_page === 2 ? dark_accent : "white"
+
+                    Behavior on color {
+                        ColorAnimation {}
+                    }
                 }
 
             }
@@ -448,7 +401,7 @@ Window {
                 height: 36
                 y: (parent.height / 2) - (height / 2)
                 x: 33 + voting_btn.width + voting_btn.x
-                color: settings_popup.visible ? "#21ffffff" : "transparent"
+                color: "transparent"
                 radius: Math.min(parent.width, parent.height) / 2
 
                 MouseArea {
@@ -458,16 +411,21 @@ Window {
                     onClicked: on_settings_clicked()
                 }
 
-                Image {
+                IconImage {
                     source: "qrc:/Images/settings.svg"
-                    sourceSize: Qt.size(parent.width, parent.width)
-                    width: 2 * parent.width / 3
-                    height: 2 * parent.width / 3
+                    width: 3 * parent.width / 4
+                    height: 3 * parent.width / 4
+                    sourceSize: Qt.size(width, width)
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
                     fillMode: Image.PreserveAspectFit
                     smooth: true
                     antialiasing: false
+                    color: settings_popup.visible ? dark_accent : "white"
+
+                    Behavior on color {
+                        ColorAnimation {}
+                    }
                 }
 
             }
