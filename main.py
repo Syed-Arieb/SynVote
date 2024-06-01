@@ -1,7 +1,7 @@
 import sys
 
 from PySide6.QtCore import QUrl
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine, qmlRegisterSingletonType
 from PySide6.QtQuickControls2 import QQuickStyle
 import backend.synvote as svbe
@@ -16,6 +16,8 @@ qml_rc.qInitResources()
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
+    icon = QIcon(":/Images/shield.svg")
+    app.setWindowIcon(icon)
     QQuickStyle.setStyle("Material")
 
     # Register URLs
