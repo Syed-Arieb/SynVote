@@ -1,24 +1,32 @@
 import sys
 
-from PySide6.QtCore import QUrl
+# PySide6 imports
+from PySide6.QtCore import QUrl, QTimer
 from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine, qmlRegisterSingletonType
 from PySide6.QtQuickControls2 import QQuickStyle
+import FeatherIconsQML
+
+# Custom Libs
 import backend.synvote as svbe
 from ui_bridge import SynBridge
-
-
-import style_rc
 from qml import qml_rc
 
+# Init Resources
 qml_rc.qInitResources()
-
 
 if __name__ == '__main__':
     app = QGuiApplication(sys.argv)
+
+    # Material Style
+    QQuickStyle.setStyle("Material")
+
+    # Backend
+    backend = svbe.SynVoteBackend()
+    
+    # Set Icon
     icon = QIcon(":/Images/shield.svg")
     app.setWindowIcon(icon)
-    QQuickStyle.setStyle("Material")
 
     # Register URLs
     FontUrl = QUrl("qrc:/FontStyle.qml")
@@ -28,12 +36,13 @@ if __name__ == '__main__':
     qmlRegisterSingletonType(StyleUrl, "AppStyle", 1, 0, "AppStyle")
     qmlRegisterSingletonType(FontUrl, "AppStyle", 1, 0, "FontStyle")
     engine = QQmlApplicationEngine()
+    FeatherIconsQML.register(engine)
 
     # Get the path of the current directory, and then add the name
     # of the QML file, to load it.
     url = QUrl("qrc:/main.qml")
+    
     engine.load(url)
-    backend = svbe.SynVoteBackend()
     bridge = SynBridge(backend)
     engine.rootObjects()[0].setProperty('backend', bridge)
 
