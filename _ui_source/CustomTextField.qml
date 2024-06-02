@@ -7,7 +7,8 @@ TextField {
     id:control
     property bool isBold: false
     property real radius: 12
-    property color borderColor: activeFocus ? AppStyle.appStyle : AppStyle.borderColor
+    property color borderColor: AppStyle.transparent
+    property color backgroundColor: AppStyle.svBackground
 
     placeholderText: qsTr("This Is Placeholder text")
     placeholderTextColor: AppStyle.placeholderColor
@@ -20,10 +21,9 @@ TextField {
     color: AppStyle.textColor
 
     background:Rectangle{
-        implicitHeight: control.implicitHeight
-        implicitWidth: control.implicitWidth
+        anchors.fill: parent
         radius: control.radius
-        color: AppStyle.popupBackground
+        color: backgroundColor
         border.width:  control.activeFocus ? 2 : 1
         border.color: control.borderColor
     }

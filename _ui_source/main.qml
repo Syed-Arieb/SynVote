@@ -7,16 +7,16 @@ import QtQuick.Controls 2.5
 import QtQuick.Controls.Fusion 2.3
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.15
+import FeatherIcons
 
 Window {
     id: root
 
+    property QtObject backend
     property bool close_nav_onNav: close_nav_onNav_switch.checked
     property bool fade_in_pages: fade_in_pages_switch.checked
     property bool resizable_window: resizable_window_switch.checked
     property int curr_active_page: 0
-    property color dark_accent: "#146EF5"
-    property QtObject backend
     property string status: "SynVote -> Deploying Contract..."
     property bool logged_in: false
 
@@ -46,7 +46,7 @@ Window {
     maximumHeight: resizable_window ? Screen.height : 720
     visible: true
     title: qsTr(status)
-    color: light_dark_theme.checked ? "#171717" : "#D0D0D9"
+    color: AppStyle.svBackground
     Material.theme: Material.Dark
     Material.accent: Material.Green
 
@@ -57,38 +57,18 @@ Window {
         property int old_Y: 0
 
         z: 0
-        color: light_dark_theme.checked ? "#242424" : "#F985BA"
+        color: AppStyle.svSecondary
         width: root.width
         height: 62
 
-        ImageSwitch {
-            // onClicked: _myClass.buttonClicked(checked)
-
-            id: light_dark_theme
-
-            x: parent.width - width - 20
-            y: parent.height / 2 - height / 2
-            z: 1
-            height: 32
-            width: 60
-            backgroundColor: "#1e1e1e"
-            backgroundColorOn: "#333742"
-            indicatorColor: "#edede9"
-            indicatorColorOn: "#7a859b"
-            checked: true
-            indicatorOffSource: "qrc:/Images/sun3.svg" // Off Image
-            indicatorOnSource: "qrc:/Images/moon2.svg" // On  Image
-            visible: false
-        }
-
         IconImage {
-            source: "qrc:/Images/shield.svg"
+            source: FeatherIconsVault.getSource("shield", 2.5)
             width: 30
             height: width
             sourceSize: Qt.size(width, width)
             x: 10
             y: title.y
-            color: dark_accent
+            color: AppStyle.svAccent
         }
 
         Text {
@@ -97,7 +77,7 @@ Window {
             x: 45
             y: parent.height / 2 - height / 2
             text: "SynVote"
-            color: "#efefef"
+            color: AppStyle.svText
             font.pointSize: 17
             font.family: FontStyle.getContentFont.name
             font.bold: Font.Bold
@@ -111,7 +91,7 @@ Window {
             y: parent.height / 2 - height / 2
             width: 60
             height: title.height
-            color: light_dark_theme.checked ? dark_accent : "#F7F7F7"
+            color: AppStyle.svAccent
             radius: 15
 
             Text {
@@ -120,7 +100,7 @@ Window {
                 x: parent.width / 2 - width / 2
                 y: parent.height / 2 - height / 2
                 text: "v1.0"
-                color: "#e3e3e3"
+                color: AppStyle.svText
                 font.pointSize: 14
                 font.family: FontStyle.getContentFont.name
                 font.bold: Font.Bold
@@ -135,15 +115,138 @@ Window {
 
         }
 
+        Rectangle {
+            id: user_header
+            x: parent.width - width - 20
+            visible: logged_in
+            anchors.verticalCenter: parent.verticalCenter
+            color: AppStyle.transparent
+            width: 22 + username_text.width
+            height: Math.max(user_drop.height, username_text.height)
+
+            IconImage {
+                id: username_text
+                anchors.verticalCenter: parent.verticalCenter
+                color: AppStyle.svText
+                source: FeatherIconsVault.getSource("user", 1.5)
+                sourceSize: Qt.size(30, 30)
+                width: 30
+                height: 30
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        user_drop.rotation = user_drop.rotation == 0 ? 180 : 0
+                        user_action_dropdown.opacity = user_action_dropdown.opacity == 1 ? 0 : 1
+                    }
+                }
+            }
+
+            IconImage {
+                id: user_drop
+                source: FeatherIconsVault.getSource("chevron-down", 1.5)
+                sourceSize: Qt.size(28, 28)
+                width: 28
+                height: 28
+                color: AppStyle.svAccent
+                x: username_text.width - 5
+                anchors.verticalCenter: parent.verticalCenter
+                rotation: 0
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        user_drop.rotation = user_drop.rotation == 0 ? 180 : 0
+                        user_action_dropdown.opacity = user_action_dropdown.opacity == 1 ? 0 : 1
+                    }
+                }
+
+                Behavior on rotation {
+                    NumberAnimation {}
+                }
+            }
+
+            
+        }
+
+        Rectangle {
+            id: user_action_dropdown
+            visible: opacity == 0 ? false : true
+            x: titlebar.width - width - 5
+            y: titlebar.height + 5
+            color: AppStyle.svSecondary
+            radius: 14
+            width: 200
+            height: logout.y + logout.height + 12
+            opacity: 0
+            
+            Text {
+                id: user_action_dropdown_title
+                text: qsTr("User Actions")
+                y: 12
+                font.pointSize: 15
+                font.family: FontStyle.getContentFont.name
+                font.bold: Font.Bold
+                font.weight: Font.Bold
+                anchors.horizontalCenter: parent.horizontalCenter
+                color: AppStyle.svText
+            }
+
+            Rectangle {
+                id: logout
+                width:parent.width
+                height: 40
+                y: 10 + user_action_dropdown_title.height + user_action_dropdown_title.y
+                color: mouse.hovered ? "#A20000" : AppStyle.transparent
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    x: 15
+                    text: "Logout"
+                    font.pointSize: 14
+                    color: mouse.hovered ? AppStyle.svText : "red"
+                }
+                IconImage {
+                    anchors.verticalCenter: parent.verticalCenter
+                    x: parent.width - width - 10
+                    source: FeatherIconsVault.getSource("log-out", 1.5)
+                    color: mouse.hovered ? AppStyle.svText : "red"
+                }
+
+                HoverHandler {
+                    id: mouse
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    cursorShape: Qt.PointingHandCursor
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        logged_in = false
+                        user_header.visible = false
+                        user_drop.rotation = 0
+                        user_action_dropdown.opacity = 0
+                        get_started.visible = true
+                    }
+                }
+            }
+
+            Behavior on opacity {
+                NumberAnimation {}
+            }
+        }
+        
+
         QPButton {
             id: get_started
             text: "Get Started"
             x: parent.width - width - 10
-            iconSource: "qrc:/Images/arrow-right.svg"
+            iconSource: FeatherIconsVault.getSource("chevron-right", 1.5)
             anchors.verticalCenter: parent.verticalCenter
-            backgroundColor: dark_accent
-            backgroundColorHover: "#1e1e1e"
-            backgroundColorClicked: "#1e1e1e"
+            visible: !(logged_in)
+            corner_radius: 10
         }
 
         Behavior on color {
@@ -161,14 +264,14 @@ Window {
         height: (root.height - 20 - bottom_nav_container.height - titlebar.height + bottom_nav.y)
         y: titlebar.x + titlebar.height + 15
         anchors.horizontalCenter: parent.horizontalCenter
-        color: "transparent"
+        color: AppStyle.transparent
 
         Rectangle {
             id: home_page
 
             anchors.fill: parent
             visible: true
-            color: "transparent"
+            color: AppStyle.transparent
             opacity: visible ? 1 : 0
             onVisibleChanged: {
                 if (visible)
@@ -176,6 +279,156 @@ Window {
                 else
                     opacity = 0;
             }
+
+            Rectangle {
+                id: home_page2
+                anchors.fill: parent
+                visible: logged_in
+                color: AppStyle.transparent
+
+                Image {
+                    id: welcome_text
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: "qrc:/Images/VoteCardBase.png"
+                    width: 280
+                    height: 403
+                    sourceSize: Qt.size(width, height)
+
+                    Text {
+                        text: "Secure Voting"
+                        color: AppStyle.svText
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pointSize: 15
+                        font.family: FontStyle.getContentFont.name
+                        font.bold: Font.Bold
+                        font.weight: Font.Bold
+                        y: 255
+                    }
+                }
+            }
+            Flipable {
+                id: form_flipable
+                width: parent.width / 3
+                height: (2 * parent.height / 3) - 70
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: !(logged_in)
+
+                property bool flipped: false
+
+                front: Rectangle {
+                    color: AppStyle.transparent
+                    anchors.fill: parent
+
+                    LoginFace {
+                        id: login_page
+                        anchors.fill: parent
+                        color: AppStyle.svSecondary
+                        visible: true
+                
+                        QPButton {
+                            id: login
+                            width: 120
+                            x: login_page.usernameX + login_page.usernameWidth - width
+                            y: parent.height - height - 30
+                            text: "Login"
+                            iconSource: FeatherIconsVault.getSource("chevron-down", 1.5)
+                            iconRotation: 270
+                            iconRight: true
+                            text_pos: 28
+                            corner_radius: 10
+
+                            onClicked: {
+                                backend.on_login_request(login_page.usernameText, login_page.passwordText);
+                            }
+                        }
+
+                        QPButton {
+                            id: register_nav
+                            width: 130
+                            x: login_page.usernameX
+                            y: login.y
+                            text: "Register"
+                            iconSource: FeatherIconsVault.getSource("external-link", 1.5)
+                            text_pos: 40
+                            corner_radius: 10
+
+                            onClicked: form_flipable.flipped = !form_flipable.flipped
+                        }
+                    }
+                }
+
+                back: Rectangle {
+                    color: AppStyle.transparent
+                    anchors.fill: parent
+
+                    RegisterFace {
+                        id: register_page
+                        anchors.fill: parent
+                        color: AppStyle.svSecondary
+                        visible: true
+                
+                        QPButton {
+                            id: login_nav
+                            width: 120
+                            x: register_page.usernameX
+                            y: parent.height - height - 30
+                            text: "Login"
+                            iconSource: FeatherIconsVault.getSource("external-link", 1.5)
+                            text_pos: 45
+                            corner_radius: 10
+
+                            onClicked: {
+                                form_flipable.flipped = !form_flipable.flipped
+                            }
+                        }
+
+                        QPButton {
+                            id: register
+                            width: 130
+                            x: register_page.usernameX + register_page.usernameWidth - width
+                            y: login_nav.y
+                            text: "Register"
+                            iconSource: FeatherIconsVault.getSource("chevron-down", 1.5)
+                            iconRotation: 270
+                            iconRight: true
+                            text_pos: 20
+                            corner_radius: 10
+
+                            onClicked: backend.on_register_request(register_page.usernameText, register_page.passwordText, register_page.tokenText);
+                        }
+                    }
+                }
+
+                transform: Rotation {
+                    id: rotation
+                    origin.x: form_flipable.width/2
+                    origin.y: form_flipable.height/2
+                    axis.x: 0; axis.y: 1; axis.z: 0     // set axis.y to 1 to rotate around y-axis
+                    angle: 0
+                }
+
+                states: State {
+                    name: "back"
+                    PropertyChanges { 
+                        target: rotation
+                        angle: 180 
+                    }
+
+                    when: form_flipable.flipped
+                }
+
+                transitions: Transition {
+                    NumberAnimation { 
+                        target: rotation
+                        property: "angle"
+                        duration: 200 
+                    }
+                }
+            }
+
+
+            
 
             Behavior on opacity {
                 enabled: fade_in_pages
@@ -194,7 +447,7 @@ Window {
 
             anchors.fill: parent
             visible: false
-            color: "transparent"
+            color: AppStyle.transparent
             opacity: visible ? 1 : 0
             onVisibleChanged: {
                 if (visible)
@@ -211,7 +464,7 @@ Window {
                 font.bold: Font.Bold
                 font.weight: Font.Bold
                 text: "SynVote - Voting"
-                color: light_dark_theme.checked ? "white" : "#1e1e1e"
+                color: AppStyle.svText
             }
 
             Behavior on opacity {
@@ -231,7 +484,7 @@ Window {
 
             anchors.fill: parent
             visible: false
-            color: "transparent"
+            color: AppStyle.transparent
             opacity: visible ? 1 : 0
             onVisibleChanged: {
                 if (visible)
@@ -248,7 +501,7 @@ Window {
                 font.bold: Font.Bold
                 font.weight: Font.Bold
                 text: "SynVote - Account"
-                color: light_dark_theme.checked ? "white" : "#1e1e1e"
+                color: AppStyle.svText
             }
 
             Behavior on opacity {
@@ -273,17 +526,17 @@ Window {
         x: 0
         y: root.height - height
         z: 2
-        color: "transparent"
+        color: AppStyle.transparent
         radius: 18
 
         Rectangle {
             id: bottom_nav
 
             x: parent.width / 2 - width / 2
-            y: parent.height - (toogle_bottom_nav.height / 3)
+            y: 0
             width: 267
             height: parent.height - 5
-            color: titlebar.color
+            color: AppStyle.svSecondary
             radius: Math.min(parent.width, parent.height) / 2
 
             Rectangle {
@@ -293,7 +546,7 @@ Window {
                 height: 36
                 y: (parent.height / 2) - (height / 2)
                 x: 12
-                color: "transparent"
+                color: AppStyle.transparent
                 radius: Math.min(parent.width, parent.height) / 2
 
                 MouseArea {
@@ -304,7 +557,7 @@ Window {
                 }
 
                 IconImage {
-                    source: "qrc:/Images/home.svg"
+                    source: FeatherIconsVault.getSource("home", 1.5)
                     width: 3 * parent.width / 4
                     height: 3 * parent.width / 4
                     sourceSize: Qt.size(width, width)
@@ -313,7 +566,7 @@ Window {
                     fillMode: Image.PreserveAspectFit
                     smooth: true
                     antialiasing: false
-                    color: curr_active_page === 0 ? dark_accent : "white"
+                    color: curr_active_page === 0 ? AppStyle.svAccent : AppStyle.svText
 
                     Behavior on color {
                         ColorAnimation {}
@@ -329,7 +582,7 @@ Window {
                 height: 36
                 y: (parent.height / 2) - (height / 2)
                 x: 45 + home_btn.width
-                color: "transparent"
+                color: AppStyle.transparent
                 radius: Math.min(parent.width, parent.height) / 2
 
                 MouseArea {
@@ -349,7 +602,7 @@ Window {
                     fillMode: Image.PreserveAspectFit
                     smooth: true
                     antialiasing: false
-                    color: curr_active_page === 1 ? dark_accent : "white"
+                    color: curr_active_page === 1 ? AppStyle.svAccent : AppStyle.svText
 
                     Behavior on color {
                         ColorAnimation {}
@@ -365,7 +618,7 @@ Window {
                 height: 36
                 y: (parent.height / 2) - (height / 2)
                 x: 33 + votes_btn.width + votes_btn.x
-                color: "transparent"
+                color: AppStyle.transparent
                 radius: Math.min(parent.width, parent.height) / 2
 
                 MouseArea {
@@ -376,7 +629,7 @@ Window {
                 }
 
                 IconImage {
-                    source: "qrc:/Images/user.svg"
+                    source: FeatherIconsVault.getSource("user", 1.5)
                     width: 3 * parent.width / 4
                     height: 3 * parent.width / 4
                     sourceSize: Qt.size(width, width)
@@ -385,7 +638,7 @@ Window {
                     fillMode: Image.PreserveAspectFit
                     smooth: true
                     antialiasing: false
-                    color: curr_active_page === 2 ? dark_accent : "white"
+                    color: curr_active_page === 2 ? AppStyle.svAccent : AppStyle.svText
 
                     Behavior on color {
                         ColorAnimation {}
@@ -401,7 +654,7 @@ Window {
                 height: 36
                 y: (parent.height / 2) - (height / 2)
                 x: 33 + voting_btn.width + voting_btn.x
-                color: "transparent"
+                color: AppStyle.transparent
                 radius: Math.min(parent.width, parent.height) / 2
 
                 MouseArea {
@@ -412,7 +665,7 @@ Window {
                 }
 
                 IconImage {
-                    source: "qrc:/Images/settings.svg"
+                    source: FeatherIconsVault.getSource("sliders", 1.5)
                     width: 3 * parent.width / 4
                     height: 3 * parent.width / 4
                     sourceSize: Qt.size(width, width)
@@ -421,7 +674,7 @@ Window {
                     fillMode: Image.PreserveAspectFit
                     smooth: true
                     antialiasing: false
-                    color: settings_popup.visible ? dark_accent : "white"
+                    color: settings_popup.visible ? AppStyle.svAccent : AppStyle.svText
 
                     Behavior on color {
                         ColorAnimation {}
@@ -433,7 +686,7 @@ Window {
             Button {
                 id: toogle_bottom_nav
 
-                icon.source: "qrc:/Images/menu.svg"
+                icon.source: FeatherIconsVault.getSource("menu", 1.5)
                 width: 36
                 height: 36
                 x: parent.width / 2 - width / 2
@@ -478,7 +731,7 @@ Window {
                     height: 36
                     x: parent.width - width - 10
                     y: 10
-                    color: "transparent"
+                    color: AppStyle.transparent
 
                     MouseArea {
                         anchors.fill: parent
@@ -487,16 +740,14 @@ Window {
                         onClicked: on_settings_clicked()
                     }
 
-                    Image {
-                        source: "qrc:/Images/x.svg"
+                    IconImage {
+                        source: FeatherIconsVault.getSource("x", 1.5)
                         sourceSize: Qt.size(parent.width, parent.width)
                         width: 2 * parent.width / 3
                         height: 2 * parent.width / 3
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.horizontalCenter: parent.horizontalCenter
                         fillMode: Image.PreserveAspectFit
-                        smooth: true
-                        antialiasing: false
                     }
 
                 }
@@ -507,7 +758,7 @@ Window {
                     text: "Settings"
                     x: parent.width / 2 - width / 2
                     y: 13
-                    color: "#EFEFEF"
+                    color: AppStyle.svText
                     font.pointSize: 15
                     font.family: FontStyle.getContentFont.name
                     font.bold: Font.Bold
@@ -518,7 +769,7 @@ Window {
                     text: "Auto Close Navbar"
                     x: 15
                     anchors.verticalCenter: close_nav_onNav_switch.verticalCenter
-                    color: "#EFEFEF"
+                    color: AppStyle.svText
                     font.pointSize: 13
                     font.family: FontStyle.getContentFont.name
                     font.bold: Font.Bold
@@ -531,14 +782,14 @@ Window {
                     y: 35 + settings_title.height
                     x: parent.width - width
                     checked: false
-                    backgroundColor: light_dark_theme.checked ? dark_accent : "#1e1e1e"
+                    backgroundColor: AppStyle.svAccent
                 }
 
                 Text {
                     text: "Fade-in Pages"
                     x: 15
                     anchors.verticalCenter: fade_in_pages_switch.verticalCenter
-                    color: "#EFEFEF"
+                    color: AppStyle.svText
                     font.pointSize: 13
                     font.family: FontStyle.getContentFont.name
                     font.bold: Font.Bold
@@ -551,14 +802,14 @@ Window {
                     y: 65 + close_nav_onNav_switch.height
                     x: parent.width - width
                     checked: true
-                    backgroundColor: light_dark_theme.checked ? dark_accent : "#1e1e1e"
+                    backgroundColor: AppStyle.svAccent
                 }
 
                 Text {
                     text: "Resizable Window"
                     x: 15
                     anchors.verticalCenter: resizable_window_switch.verticalCenter
-                    color: "#EFEFEF"
+                    color: AppStyle.svText
                     font.pointSize: 13
                     font.family: FontStyle.getContentFont.name
                     font.bold: Font.Bold
@@ -571,7 +822,7 @@ Window {
                     y: fade_in_pages_switch.y + (fade_in_pages_switch.y - close_nav_onNav_switch.y)
                     x: parent.width - width
                     checked: false
-                    backgroundColor: light_dark_theme.checked ? dark_accent : "#1e1e1e"
+                    backgroundColor: AppStyle.svAccent
                 }
 
                 Behavior on opacity {
@@ -599,7 +850,25 @@ Window {
             status = msg;
         }
 
+        function onLoginChanged(status) {
+            logged_in = status;
+            user_header.visible = status
+            get_started.visible = status ? false : true
+        }
+
+        function onLoginResponse(login_response) {
+            toast.toastText = login_response
+            toast.toast_visible = true
+        }
+
         target: backend
+    }
+
+    QPToast {
+        id: toast
+        z: 14
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: titlebar.height + 10
     }
 
     Behavior on color {

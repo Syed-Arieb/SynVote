@@ -37,6 +37,9 @@
         <file>qtquickcontrols2.conf</file>
         <file>CustomSwitch.qml</file>
         <file>QPButton.qml</file>
+        <file>QPToast.qml</file>
+        <file>LoginFace.qml</file>
+        <file>RegisterFace.qml</file>
         <file>ImageSwitch.qml</file>
         <file>Images/sun2.svg</file>
         <file>Images/moon2.svg</file>
@@ -44,5 +47,9 @@
         <file>Images/x.svg</file>
         <file>Images/shield.svg</file>
         <file>Images/voting.svg</file>
+        <file>Images/VoteCardBase.svg</file>
+        <file>Images/VoteCardBase.png</file>
+        <file>Images/chevron-down.svg</file>
+        <file>Images/external-link.svg</file>
     </qresource>
 </RCC>

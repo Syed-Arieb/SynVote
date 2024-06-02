@@ -9,4 +9,6 @@ echo.
 echo Executing Script... 
 cd ../
 python main.py
-echo
+echo.
+pause > nul
+exit

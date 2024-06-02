@@ -6,19 +6,22 @@ Button {
     id: control
 
     property bool isMouseOver: mouse.hovered
-    property color backgroundColor: AppStyle.popupBackground
-    property color backgroundColorClicked: "#cc33da"
-    property color backgroundColorHover: "#7e3c8e"
-    property color foregroundColor: "#e5e5e5"
-    property color foregroundColorHover: "#e5e5e5"
-    property color foregroundColorClicked: "#e5e5e5"
-    property color borderColor: "#00000000"
-    property color borderColorClicked: "#00000000"
+    property color backgroundColor: AppStyle.svAccent
+    property color backgroundColorClicked: AppStyle.svBackground
+    property color backgroundColorHover: AppStyle.svBackground
+    property color foregroundColor: AppStyle.svText
+    property color foregroundColorHover: AppStyle.svText
+    property color foregroundColorClicked: AppStyle.svText
+    property color borderColor: AppStyle.transparent
+    property color borderColorClicked: AppStyle.transparent
     property real corner_radius: 15
     property string iconSource: ""
-    property color iconColor: "#ffffff"
-    property bool isBold: false
+    property color iconColor: AppStyle.svText
     property int iconSize: 22
+    property bool isBold: false
+    property int iconRotation: 0
+    property bool iconRight: false
+    property int text_pos: 0
 
     width: textItem.x + textItem.width + 12
     height: 40
@@ -31,7 +34,7 @@ Button {
         text: "igonre_test"
         width: 0
         height: 0
-        color: "#00ffffff"
+        color: borderColor
     }
 
     states: [
@@ -96,7 +99,7 @@ Button {
 
     Rectangle {
         anchors.fill: parent
-        color: "#00ffffff"
+        color: borderColor
         IconImage {
             id: icon
             visible: iconSource == "" ? false : true
@@ -105,27 +108,30 @@ Button {
             color: iconColor
             width: visible ? iconSize : 0
             height: visible ? iconSize : 0
-            x: 8
+            x: iconRight ? parent.width - width - 10 : 10
             anchors.verticalCenter: parent.verticalCenter
+            rotation: iconRotation
         }
 
         Text {
             id: textItem
-            x: icon.x + icon.width + 5
+            x: text_pos !== 0 ? text_pos : icon.width == 0 ? (parent.width/2) - (width/2) : iconRight ? (parent.width/2) - (width/2) - (icon.width/2) : icon.x + icon.width + 5
             text: control.text
             opacity: enabled ? 1 : 0.3
-            color: "#047eff"
+            color: foregroundColor
             anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: FontStyle.h3
             font.family: isBold ? FontStyle.getContentFontBold.name : FontStyle.getContentFont.name
             font.bold: isBold ? Font.Bold : Font.Normal
             font.weight: isBold ? Font.Bold : Font.Normal
         }
+        
     }
 
     
 
     
+
 
     
 

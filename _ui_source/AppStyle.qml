@@ -11,4 +11,10 @@ QtObject {
     readonly property color textColor: "#FFFFFF"
     readonly property color borderColor: "#464a53"
     readonly property color placeholderColor: "#757985"
+    readonly property color transparent: "transparent"
+    
+    readonly property color svBackground: "#121212"
+    readonly property color svAccent: "#146EF5"
+    readonly property color svText: "#efefef"
+    readonly property color svSecondary: "#242424"
 }
