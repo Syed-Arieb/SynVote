@@ -1,11 +1,12 @@
-import json, os
+import json, os, random
 
 from PySide6.QtCore import QObject, Slot, Signal, QTimer, QThread
 import backend.synvote as svbe
 from SynAuth import SynAuth
+from listmodel import ItemModel
 
 class LoginWorker(QObject):
-    loginCompleted = Signal(bool, str)  # Signal to indicate login is completed
+    loginCompleted = Signal(bool, str, str)  # Signal to indicate login is completed
 
     def __init__(self, username, password):
         super().__init__()
@@ -20,7 +21,7 @@ class LoginWorker(QObject):
             msg = "Login Successful"
         else:
             msg = "Invalid Credentials"
-        self.loginCompleted.emit(result, msg)
+        self.loginCompleted.emit(result, msg, self.username)
 
 
 class RegisterWorker(QObject):
@@ -48,6 +49,8 @@ class SynBridge(QObject):
     statusChanged = Signal(str, arguments=['msg'])
     loginChanged = Signal(bool, arguments=['status'])
     loginResponse = Signal(str, arguments=["login_response"])
+    modelUpdate = Signal(int, str, int, arguments=['index', 'room_name', 'candidates'])
+    acknowledgement = Signal()
 
     def __init__(self, backend):
         super().__init__()
@@ -58,8 +61,11 @@ class SynBridge(QObject):
         self.thread = None
         self.login_worker = None
         self.operation_in_process = False
+        self._rooms_info = []
+        self.emitted_index = 0
+        self.acknowledgement.connect(self.on_acknowledgement)
         # Define timer.
-        QTimer.singleShot(2000, self.update_status)
+        QTimer.singleShot(300, self.update_status)
 
     def update_status(self):
         # Pass the current time to QML.
@@ -93,7 +99,59 @@ class SynBridge(QObject):
             del self.auth
             self.auth = None
             return result
+
+    def init_test_rooms(self, add_demo_candidates = False):
+        self.syn_backend.create_voting_room("BCS-A CR")
+        self.syn_backend.create_voting_room("School Board")
+        self.syn_backend.create_voting_room("Union Leadership")
+        self.syn_backend.create_voting_room("Board of Directors")
+        if add_demo_candidates:
+            count = self.syn_backend.get_voting_room_count()
+            while count > 0:
+                self.syn_backend.add_demo_candidates(count)
+                count-=1
+    
+    def gen_item_model(self):
+        self._rooms_info = []
         
+        self.init_test_rooms(add_demo_candidates=True)
+        rooms_count = self.syn_backend.get_voting_room_count()
+        n = 1
+        while n <= rooms_count:
+            temp = []
+            temp.append(n)
+            temp.append(self.syn_backend.get_voting_room(n)[0])
+            temp.append(self.syn_backend.get_voting_room(n)[1])
+            self._rooms_info.append(temp)
+            n += 1
+
+        self.emitted_index = 0
+        idx = self._rooms_info[self.emitted_index][0]
+        name = self._rooms_info[self.emitted_index][1]
+        cand = self._rooms_info[self.emitted_index][2]
+        self.modelUpdate.emit(idx, name, cand)
+        return self._rooms_info
+    
+    @Slot()
+    def acknowledge(self):
+        # Emit the acknowledgement signal
+        self.acknowledgement.emit()
+
+    @Slot()
+    def get_list_data(self):
+        # Emit the acknowledgement signal
+        self.gen_item_model()
+
+    @Slot()
+    def on_acknowledgement(self):
+        self.emitted_index += 1
+        if self.emitted_index >= self.syn_backend.get_voting_room_count():
+            self.emitted_index = 0
+            return
+        idx = self._rooms_info[self.emitted_index][0]
+        name = self._rooms_info[self.emitted_index][1]
+        cand = self._rooms_info[self.emitted_index][2]
+        self.modelUpdate.emit(idx, name, cand)
         
     def read_creds(self):
         file_path = os.path.join("C:\\", "ProgramData", "SynVote", "creds.json")
@@ -157,15 +215,92 @@ class SynBridge(QObject):
 
         self.thread.start()
         
+    def bind_acc_to_profile(self, username, acc_id):
+        file_path = os.path.join("C:\\", "ProgramData", "SynVote", "bindings.json")
+        with open(file_path, 'a') as file:
+            content = {
+                "username": username,
+                "acc_id": acc_id
+            }
+            jstr = json.dumps(content, indent=4)
+            file.write(jstr + '\n')
+
+    def read_bindings(self):
+        file_path = os.path.join("C:\\", "ProgramData", "SynVote", "bindings.json")
+        bindings = []
+        try:
+            with open(file_path, 'r') as file:
+                for line in file:
+                    binding = json.loads(line)
+                    bindings.append(binding)
+            return bindings
+        except:
+            print("Failed!")
+            return bindings
+        
+    def check_binding_exists(self, username):
+        bindings = self.read_bindings()
+        for binding in bindings:
+            if binding["username"] == username:
+                return True
+        return False
     
-    def handle_login_response(self, result, message):
+    def is_acc_free(self, acc_id):
+        bindings = self.read_bindings()
+        for binding in bindings:
+            if binding["acc_id"] == acc_id:
+                return False
+        return True
+    
+    def get_binding(self, username):
+        bindings = self.read_bindings()
+        for binding in bindings:
+            if binding["username"] == username:
+                return binding["acc_id"]
+        return 0
+    
+    def get_total_binds(self):
+        bindings = self.read_bindings()
+        return len(bindings)
+    
+    def init_eth_account(self, user):
+        acc_id = 0
+        if self.check_binding_exists(user):
+            acc_id = self.get_binding(user)
+            self.syn_backend.switch_account(acc_id)
+        else:
+            acc_id = random.randint(1, self.syn_backend.get_accounts_count() - 1)
+            while not self.is_acc_free(acc_id) and self.get_total_binds() < 10:
+                acc_id = random.randint(1, self.syn_backend.get_accounts_count() - 1)
+
+            self.syn_backend.switch_account(acc_id)
+            self.bind_acc_to_profile(user, acc_id)
+        print (f"Logged In as : Syn#{acc_id}")
+    
+    def handle_login_response(self, result, message, user):
         if result:
             self.on_login(is_login=result)
             self.update_login()
+            if user != 'arieb':
+                self.init_eth_account(user)
+                
         self.loginResponse.emit(message)
         self.operation_in_process = False
     
     def handle_register_response(self, result, message):
         self.loginResponse.emit(message)
         self.operation_in_process = False
+
+    @Slot()
+    def get_rooms_info(self):
+        return self._rooms_info
         
+
+
+
+
+def main():
+    print("backend.get_candidate(1, 5)[0]")
+
+if __name__ == "__main__":
+    main()
