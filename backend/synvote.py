@@ -54,6 +54,24 @@ class SynVoteBackend:
 
     def get_candidate(self, room_id, candidate_id):
         return self.contract.functions.getCandidate(room_id, candidate_id).call()
+    
+    def get_candidates(self, room_id):
+        room_obj = self.get_voting_room(room_id)
+        count = room_obj[1]
+        candidates = []
+        i= 0
+        for i in range(count):
+            candidates.append(self.get_candidate(room_id, i+1)[0])
+        return candidates
+    
+    def get_candidates_data(self, room_id):
+        room_obj = self.get_voting_room(room_id)
+        count = room_obj[1]
+        candidates = []
+        i= 0
+        for i in range(count):
+            candidates.append(self.get_candidate(room_id, i+1))
+        return candidates
 
     def get_voting_room(self, room_id):
         return self.contract.functions.getVotingRoom(room_id).call()
@@ -81,14 +99,18 @@ class SynVoteBackend:
 
 def main():
     backend = SynVoteBackend()
-    print(backend.get_is_deployer(backend.get_current_account()))
-    backend.switch_account(1)
-    print(backend.get_is_deployer(backend.get_current_account()))
-    backend.switch_account(2)
-    print(backend.get_is_deployer(backend.get_current_account()))
-    backend.create_voting_room("test")
-    backend.switch_account(0)
-    print(backend.get_is_deployer(backend.get_current_account()))
+    backend.create_voting_room("textt")
+    backend.add_demo_candidates(1)
+    print(backend.get_candidates_data(1))
 
 if __name__ == "__main__":
     main()
+
+
+
+"""transact_hash = SynVote.constructor().transact()
+        transact_reciept = self.w3.eth.wait_for_transaction_receipt(
+            transaction_hash=transact_hash)
+
+        self.SynVote_contact = self.w3.eth.contract(
+            address=transact_reciept.contractAddress, abi=contract_abi)"""

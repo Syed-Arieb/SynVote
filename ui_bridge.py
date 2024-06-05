@@ -1,9 +1,11 @@
-import json, os, random
+import json, os, random,sys
 
 from PySide6.QtCore import QObject, Slot, Signal, QTimer, QThread
+from PySide6.QtWidgets import QApplication, QMainWindow
 import backend.synvote as svbe
 from SynAuth import SynAuth
 from listmodel import ItemModel
+from SynChart import VotingChart
 
 class LoginWorker(QObject):
     loginCompleted = Signal(bool, str, str)  # Signal to indicate login is completed
@@ -47,13 +49,17 @@ class RegisterWorker(QObject):
 
 class SynBridge(QObject):
     statusChanged = Signal(str, arguments=['msg'])
-    loginChanged = Signal(bool, arguments=['status'])
+    loginChanged = Signal(bool, bool, arguments=['status', 'is_deployer'])
     loginResponse = Signal(str, arguments=["login_response"])
     modelUpdate = Signal(int, str, int, arguments=['index', 'room_name', 'candidates'])
     acknowledgement = Signal()
+    candidatesUpdate = Signal(str, list)
 
     def __init__(self, backend):
         super().__init__()
+        self.vote_res: VotingChart = None
+        self.window: QMainWindow = None
+
         self.auth : SynAuth = None
         self.syn_backend: svbe.SynVoteBackend = backend
         self.active_account = 0
@@ -73,9 +79,12 @@ class SynBridge(QObject):
         status_str = f'SynVote -> Contract Deployed by {d_addr}'
         self.statusChanged.emit(status_str)
 
-    def update_login(self):
+    def update_login(self, username):
         # Pass the current time to QML.
-        self.loginChanged.emit(self.is_login)
+        deployer = False
+        if self.is_login:
+            deployer = self.syn_backend.get_is_deployer(self.syn_backend.get_current_account())
+        self.loginChanged.emit(self.is_login, deployer)
 
     def try_login(self):
         creds = self.read_creds()
@@ -85,7 +94,7 @@ class SynBridge(QObject):
         result = self.auth.is_authenticated()[0]
         if result:
             self.on_login(is_login=result)
-            self.update_login()
+            self.update_login(creds["username"])
             print(f"Result: {result}")
 
     def process_login_request(self, username, password):
@@ -94,7 +103,7 @@ class SynBridge(QObject):
         result = self.auth.is_authenticated()[0]
         if result:
             self.on_login(is_login=result)
-            self.update_login()
+            self.update_login(username)
             # delete self.auth
             del self.auth
             self.auth = None
@@ -105,9 +114,16 @@ class SynBridge(QObject):
         self.syn_backend.create_voting_room("School Board")
         self.syn_backend.create_voting_room("Union Leadership")
         self.syn_backend.create_voting_room("Board of Directors")
+
+        self.syn_backend.add_candidate(1, "Muhammad Zaid")
+        self.syn_backend.add_candidate(1, "Umair Dost")
+        self.syn_backend.add_candidate(1, "Ahmed Khan")
+        self.syn_backend.add_candidate(1, "Khayal Muhammad")
+        self.syn_backend.add_candidate(1, "Ahmad Irfan Khan")
+
         if add_demo_candidates:
             count = self.syn_backend.get_voting_room_count()
-            while count > 0:
+            while count > 1:
                 self.syn_backend.add_demo_candidates(count)
                 count-=1
     
@@ -263,6 +279,13 @@ class SynBridge(QObject):
         bindings = self.read_bindings()
         return len(bindings)
     
+    @Slot(int)
+    def get_candidates(self, roomID):
+        print(f"Candidates requested for Room #{roomID}")
+        candidates = self.syn_backend.get_candidates(roomID)
+        name = self.syn_backend.get_voting_room(roomID)[0]
+        self.candidatesUpdate.emit(name, candidates)
+    
     def init_eth_account(self, user):
         acc_id = 0
         if self.check_binding_exists(user):
@@ -280,9 +303,14 @@ class SynBridge(QObject):
     def handle_login_response(self, result, message, user):
         if result:
             self.on_login(is_login=result)
-            self.update_login()
             if user != 'arieb':
                 self.init_eth_account(user)
+            else:
+                # DEPLOYER ACCOUNT IS ARIEB
+                self.syn_backend.switch_account(0)
+            
+            self.update_login(user)
+            
                 
         self.loginResponse.emit(message)
         self.operation_in_process = False
@@ -294,8 +322,41 @@ class SynBridge(QObject):
     @Slot()
     def get_rooms_info(self):
         return self._rooms_info
-        
+    
+    @Slot(int, int, str)
+    def cast_vote(self, room_id, candidate_id, candidate_name):
+        try:
+            self.syn_backend.vote(room_id, candidate_id)
+            self.loginResponse.emit(f"Vote Casted to {candidate_name}!")
+        except:
+            self.loginResponse.emit(f"Voting again is not allowed..")
 
+    @Slot(int)
+    def show_room_result2(self, room_id):
+        try:
+            print(f"Fetching room result for Room #{room_id}")
+            room_result = self.syn_backend.get_candidates_data(room_id)
+            print(f"Room result: {room_result}")
+
+            if not room_result:
+                raise ValueError("Room result is empty")
+
+            self.vote_res = VotingChart(room_result, room_id)
+            self.vote_res.show()
+        except Exception as e:
+            print(f"Error in show_room_result: {e}")
+            self.loginResponse.emit(f"Failed to show room result for Room #{room_id}")
+
+
+    @Slot(int)
+    def show_room_result(self, room_id):
+        room_result = self.syn_backend.get_candidates_data(room_id)
+        self.window = QMainWindow()
+        self.window.setWindowTitle("Voting Result")
+        self.vote_res = VotingChart(room_result, room_id)
+        self.window.setCentralWidget(self.vote_res)
+        self.window.resize(650, 600)
+        self.window.show()
 
 
 

@@ -1,4 +1,4 @@
-// pyside6-rcc qml.qrc -o ../qml/qml_rc.py
+// pyside6-rcc qml.qrc -o ../qml/qml_rc.p
 // Themes switching is currently disabled
 
 import AppStyle 1.0
@@ -7,6 +7,7 @@ import QtQuick.Controls 2.5
 import QtQuick.Controls.Fusion 2.3
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.15
+import QtCharts 2.7
 import FeatherIcons
 
 Window {
@@ -22,6 +23,8 @@ Window {
     property alias home_list_mod: home_list_model
     property alias home_list_view: home_list
     property bool list_updated: false
+
+    property bool isDeployer: false
 
     function toggleNavigation() {
         bottom_nav.y = bottom_nav.y === 0 ? bottom_nav_container.height - (toogle_bottom_nav.height / 3) : 0;
@@ -181,7 +184,7 @@ Window {
             visible: opacity == 0 ? false : true
             x: titlebar.width - width - 5
             y: titlebar.height + 5
-            z: 15
+            z: 25
             color: AppStyle.svSecondary
             radius: 14
             width: 200
@@ -233,6 +236,7 @@ Window {
                         user_drop.rotation = 0
                         user_action_dropdown.opacity = 0
                         get_started.visible = true
+                        voting_page_component.votingRoomID = -1
                     }
                 }
             }
@@ -292,10 +296,20 @@ Window {
                 visible: logged_in
                 color: AppStyle.transparent
 
+                Text {
+                    id: home_text
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    y: home_list.y - height - 16
+                    text: "Please Select a Voting Room"
+                    font.pointSize: 15
+                    font.family: FontStyle.getContentFont.name
+                    color: AppStyle.svText
+                }
+
                 ListView {
                     id: home_list
                     width: (280*3) + (30*2)
-                    height: 450
+                    height: 250
                     snapMode: ListView.SnapOneItem
                     orientation: ListView.Horizontal
                     anchors.centerIn: parent
@@ -310,7 +324,7 @@ Window {
                     delegate: Rectangle {
                         // Card
                         width: 280
-                        height: 440
+                        height: 250
                         color: AppStyle.svSecondary
                         radius: 12
                         
@@ -318,7 +332,7 @@ Window {
                             anchors.horizontalCenter: parent.horizontalCenter
                             y: 15
                             color: AppStyle.svText
-                            text: model.name
+                            text: "Voting Room #" + model.room_index
                             font.pointSize: 14
                             font.family: FontStyle.getContentFont.name
                             font.bold: Font.Bold
@@ -326,70 +340,80 @@ Window {
                         }
 
                         Text {
-                            y: 75
-                            x: 20
-                            text: "Room ID: "
-                            font.pointSize: 13
-                            font.family: FontStyle.getContentFont.name
-                            font.bold: Font.Bold
-                            font.weight: Font.Bold
-                            color: AppStyle.svAccent
-                        }
-
-                        Text {
-                            y: 75
-                            x: 95
-                            text: model.room_index.toString()
-                            font.pointSize: 13
-                            font.family: FontStyle.getContentFont.name
+                            anchors.centerIn: parent
                             color: AppStyle.svText
-                        }
-
-                        Text {
-                            y: 130
-                            x: 20
-                            text: "Name:"
-                            font.pointSize: 13
-                            font.family: FontStyle.getContentFont.name
-                            font.bold: Font.Bold
-                            font.weight: Font.Bold
-                            color: AppStyle.svAccent
-                        }
-
-                        Text {
-                            y: 130
-                            x: 79
                             text: model.name
-                            font.pointSize: 13
-                            font.family: FontStyle.getContentFont.name
-                            color: AppStyle.svText
-                        }
-
-                        Text {
-                            y: 185
-                            x: 20
-                            text: "Candidates:"
-                            font.pointSize: 13
+                            font.pointSize: 16
                             font.family: FontStyle.getContentFont.name
                             font.bold: Font.Bold
                             font.weight: Font.Bold
-                            color: AppStyle.svAccent
                         }
 
-                        Text {
-                            y: 185
-                            x: 118
-                            text: model.count
-                            font.pointSize: 13
-                            font.family: FontStyle.getContentFont.name
-                            color: AppStyle.svText
-                        }
+                        // Text {
+                        //     y: 125
+                        //     x: 20
+                        //     text: "Room ID: "
+                        //     font.pointSize: 13
+                        //     font.family: FontStyle.getContentFont.name
+                        //     font.bold: Font.Bold
+                        //     font.weight: Font.Bold
+                        //     color: AppStyle.svAccent
+                        // }
+
+                        // Text {
+                        //     y: 125
+                        //     x: 95
+                        //     text: model.room_index.toString()
+                        //     font.pointSize: 13
+                        //     font.family: FontStyle.getContentFont.name
+                        //     color: AppStyle.svText
+                        // }
+
+                        // Text {
+                        //     y: 180
+                        //     x: 20
+                        //     text: "Name:"
+                        //     font.pointSize: 13
+                        //     font.family: FontStyle.getContentFont.name
+                        //     font.bold: Font.Bold
+                        //     font.weight: Font.Bold
+                        //     color: AppStyle.svAccent
+                        // }
+
+                        // Text {
+                        //     y: 180
+                        //     x: 79
+                        //     text: model.name
+                        //     font.pointSize: 13
+                        //     font.family: FontStyle.getContentFont.name
+                        //     color: AppStyle.svText
+                        // }
+
+                        // Text {
+                        //     y: 230
+                        //     x: 20
+                        //     text: "Candidates:"
+                        //     font.pointSize: 13
+                        //     font.family: FontStyle.getContentFont.name
+                        //     font.bold: Font.Bold
+                        //     font.weight: Font.Bold
+                        //     color: AppStyle.svAccent
+                        // }
+
+                        // Text {
+                        //     y: 230
+                        //     x: 118
+                        //     text: model.count
+                        //     font.pointSize: 13
+                        //     font.family: FontStyle.getContentFont.name
+                        //     color: AppStyle.svText
+                        // }
 
                         QPButton {
-                            x: 155
-                            y: 380
-                            text: "Vote Now"
-                            width: 110
+                            x: parent.width - width - 15
+                            y: parent.height - height - 15
+                            text: "Open Room"
+                            width: 135
                             height: 45
                             corner_radius: 10
                             onClicked: {
@@ -560,6 +584,14 @@ Window {
                 font.weight: Font.Bold
                 text: "SynVote - Voting"
                 color: AppStyle.svText
+            }
+
+            VotingPage {
+                id: voting_page_component
+                anchors.fill: parent
+
+                btn_cast_vote.onClicked: root.vote(votingRoomID, selected_index, selected_name)
+                btn_get_result.onClicked: root.requestResult(votingRoomID)
             }
 
             Behavior on opacity {
@@ -941,9 +973,19 @@ Window {
     }
 
     function navigate_voting(id) {
-        //
-
+        voting_page_component.votingRoomID = id
+        backend.get_candidates(id)
         on_navBtn_clicked(1)
+    }
+
+    function requestResult(room_id)
+    {
+        backend.show_room_result(room_id)
+    }
+
+    function vote(room_id, candidate_id, c_name) {
+        candidate_id = candidate_id + 1
+        backend.cast_vote(room_id, candidate_id, c_name)
     }
 
     Connections {
@@ -952,10 +994,12 @@ Window {
             backend.get_list_data()
         }
 
-        function onLoginChanged(status) {
+        function onLoginChanged(status, is_deployer) {
             logged_in = status;
             user_header.visible = status
             get_started.visible = status ? false : true
+
+            root.isDeployer = is_deployer
         }
 
         function onLoginResponse(login_response) {
@@ -966,6 +1010,11 @@ Window {
         function onModelUpdate(index, room_name, candidates) {
             home_list_mod.append({ room_index: index, name: room_name, count: candidates })
             backend.acknowledge()
+        }
+
+        function onCandidatesUpdate(room_name, candidate_arr) {
+            voting_page_component.cand_list_model = candidate_arr
+            voting_page_component.room_name = room_name
         }
 
         target: backend
@@ -985,6 +1034,9 @@ Window {
     }
 
 }
+
+
+
 
 
 // listen to signal with index name and candidates count

@@ -14,14 +14,15 @@ Button {
     property color foregroundColorClicked: AppStyle.svText
     property color borderColor: AppStyle.transparent
     property color borderColorClicked: AppStyle.transparent
-    property real corner_radius: 15
+    property alias corner_radius: buttonBackground.radius
     property string iconSource: ""
-    property color iconColor: AppStyle.svText
+    property alias iconColor: icon.color
     property int iconSize: 22
     property bool isBold: false
     property int iconRotation: 0
     property bool iconRight: false
     property int text_pos: 0
+    property alias iconX: icon.x
 
     width: textItem.x + textItem.width + 12
     height: 40

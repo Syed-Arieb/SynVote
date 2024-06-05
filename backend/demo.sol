@@ -53,37 +53,24 @@ contract SynVote {
 
     // Function to add a candidate to a voting room
     function addCandidate(uint256 roomId, string memory name) public onlyOwner {
-        require(
-            roomId > 0 && roomId <= votingRoomCount,
-            "Invalid voting room ID"
-        );
+        // Require valid Room ID
+        require(roomId > 0 && roomId <= votingRoomCount, "Invalid voting room ID");
 
         VotingRoom storage room = votingRooms[roomId];
         room.candidateCount++;
-        room.candidates[room.candidateCount] = Candidate({
-            name: name,
-            voteCount: 0
-        });
+        room.candidates[room.candidateCount] = Candidate({name: name, voteCount: 0});
 
         emit CandidateAdded(roomId, room.candidateCount, name);
     }
 
     // Function to vote for a candidate in a voting room
     function vote(uint256 roomId, uint256 candidateId) public {
-        require(
-            roomId > 0 && roomId <= votingRoomCount,
-            "Invalid voting room ID"
-        );
+        require(roomId > 0 && roomId <= votingRoomCount, "Invalid voting room ID");
 
         VotingRoom storage room = votingRooms[roomId];
-        require(
-            candidateId > 0 && candidateId <= room.candidateCount,
-            "Invalid candidate ID"
-        );
-        require(
-            !room.hasVoted[msg.sender],
-            "You have already voted in this room"
-        );
+
+        require(candidateId > 0 && candidateId <= room.candidateCount, "Invalid candidate ID");
+        require(!room.hasVoted[msg.sender], "You have already voted in this room");
 
         room.candidates[candidateId].voteCount++;
         room.hasVoted[msg.sender] = true;
@@ -92,33 +79,19 @@ contract SynVote {
     }
 
     // Function to get the details of a candidate in a voting room
-    function getCandidate(
-        uint256 roomId,
-        uint256 candidateId
-    ) public view returns (string memory name, uint256 voteCount) {
-        require(
-            roomId > 0 && roomId <= votingRoomCount,
-            "Invalid voting room ID"
-        );
+    function getCandidate(uint256 roomId, uint256 candidateId) public view returns (string memory name, uint256 voteCount) {
+        require(roomId > 0 && roomId <= votingRoomCount, "Invalid voting room ID");
 
         VotingRoom storage room = votingRooms[roomId];
-        require(
-            candidateId > 0 && candidateId <= room.candidateCount,
-            "Invalid candidate ID"
-        );
+        require(candidateId > 0 && candidateId <= room.candidateCount, "Invalid candidate ID");
 
         Candidate storage candidate = room.candidates[candidateId];
         return (candidate.name, candidate.voteCount);
     }
 
     // Function to get the details of a voting room
-    function getVotingRoom(
-        uint256 roomId
-    ) public view returns (string memory name, uint256 candidateCount) {
-        require(
-            roomId > 0 && roomId <= votingRoomCount,
-            "Invalid voting room ID"
-        );
+    function getVotingRoom(uint256 roomId) public view returns (string memory name, uint256 candidateCount) {
+        require(roomId > 0 && roomId <= votingRoomCount, "Invalid voting room ID");
 
         VotingRoom storage room = votingRooms[roomId];
         return (room.name, room.candidateCount);

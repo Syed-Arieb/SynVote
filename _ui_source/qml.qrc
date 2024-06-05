@@ -41,6 +41,8 @@
         <file>LoginFace.qml</file>
         <file>RegisterFace.qml</file>
         <file>ImageSwitch.qml</file>
+        <file>VotingPage.qml</file>
+        <file>VoteResultView.qml</file>
         <file>Images/sun2.svg</file>
         <file>Images/moon2.svg</file>
         <file>Images/sun3.svg</file>

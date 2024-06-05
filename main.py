@@ -5,6 +5,7 @@ from PySide6.QtCore import QUrl, QTimer
 from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine, qmlRegisterSingletonType
 from PySide6.QtQuickControls2 import QQuickStyle
+from PySide6.QtWidgets import QApplication
 import FeatherIconsQML
 
 # Custom Libs
@@ -16,7 +17,7 @@ from qml import qml_rc
 qml_rc.qInitResources()
 
 if __name__ == '__main__':
-    app = QGuiApplication(sys.argv)
+    app = QApplication(sys.argv)
 
     # Material Style
     QQuickStyle.setStyle("Material")
@@ -45,6 +46,8 @@ if __name__ == '__main__':
     engine.load(url)
     bridge = SynBridge(backend)
     engine.rootObjects()[0].setProperty('backend', bridge)
+
+#    QQmlApplicationEngine().load("qrc:/VoteResultView.qml")
 
     if not engine.rootObjects():
         sys.exit(-1)

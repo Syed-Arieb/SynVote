@@ -7,14 +7,14 @@ import AppStyle 1.0
 
 ComboBox {
     id:root
-    model:["one","two","three","four"]
-    implicitHeight: 55
+    model: ["one","two","three","four"]
+    implicitHeight: 50
     implicitWidth: 300
 
     property real radius: 12
-    property color backgroundColor: "#2a2d36"
+    property color backgroundColor: AppStyle.svSecondary
 
-    property color checkedColor: AppStyle.popupBackground
+    property color checkedColor: AppStyle.svBackground
 
 
     delegate: ItemDelegate{
@@ -27,7 +27,7 @@ ComboBox {
         background: Rectangle{
             anchors.fill: parent
             radius: 8
-            color: itemDelegate.hovered ? root.backgroundColor : "transparent"
+            color: itemDelegate.hovered ? AppStyle.svAccent : "transparent"
         }
 
         RowLayout{
@@ -42,22 +42,13 @@ ComboBox {
             Label{
                 opacity: 0.9
                 text: modelData
-                font.pixelSize: FontStyle.h3
+                font.pixelSize: FontStyle.h4
                 color: itemDelegate.hovered ? "#FFFFFF" : AppStyle.textColor
                 Layout.fillWidth: true
                 verticalAlignment: Image.AlignVCenter
                 Layout.alignment: Qt.AlignVCenter
                 Layout.leftMargin: 10
             }
-
-//            Image{
-//                visible: root.currentIndex === index
-//                source: "qrc:/Images/tick.svg"
-//                verticalAlignment: Image.AlignVCenter
-//                horizontalAlignment: Image.AlignRight
-//                Layout.alignment: Qt.AlignVCenter
-//                Layout.rightMargin: 10
-//            }
         }
     }
 
@@ -70,7 +61,7 @@ ComboBox {
             Label{
                 opacity: 0.9
                 text: root.displayText
-                font.pixelSize: FontStyle.h3
+                font.pixelSize: FontStyle.h4
                 Layout.fillWidth: true
                 verticalAlignment: Image.AlignVCenter
                 Layout.alignment: Qt.AlignVCenter
@@ -84,10 +75,9 @@ ComboBox {
     background: Rectangle{
         implicitWidth: root.implicitWidth
         implicitHeight: root.implicitHeight
-        color: root.down ? Qt.darker(root.checkedColor,1.2) : root.checkedColor
+        color: AppStyle.svBackground
         radius: root.radius
-        border.width: root.activeFocus ? 2 : 0.6
-        border.color: root.activeFocus ? AppStyle.appStyle : AppStyle.borderColor
+        border.width: 0
     }
 
     popup: Popup{
@@ -107,10 +97,10 @@ ComboBox {
 
         background: Rectangle{
             anchors.fill: parent
-            color: AppStyle.popupBackground
-            radius: 6
-            border.width: 0.6
-            border.color: AppStyle.borderColor
+            color: AppStyle.svBackground
+            radius: root.radius
+            border.width: 1.3
+            border.color: AppStyle.svSecondary
             clip: true
         }
     }
